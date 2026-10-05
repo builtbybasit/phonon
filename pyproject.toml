@@ -1,0 +1,25 @@
+[project]
+name = "phonon"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fermion-research>=0.2.9",
+    "scipy>=1.17.1",
+    "soundfile>=0.14.0",
+    "zstandard>=0.25.0",
+    # Apple Silicon: GPU via MLX
+    "mlx>=0.32.3; sys_platform == 'darwin'",
+    "mlx-audio>=0.4.2; sys_platform == 'darwin'",
+    "mlx-lm>=0.31.1; sys_platform == 'darwin'",
+    # Windows / Linux: CPU via torch
+    "torch; sys_platform != 'darwin'",
+    "safetensors; sys_platform != 'darwin'",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

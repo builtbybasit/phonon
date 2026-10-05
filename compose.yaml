@@ -1,0 +1,21 @@
+# NVIDIA GPU server (Windows via Docker Desktop + WSL2, or Linux + NVIDIA Container Toolkit).
+# The pip package has no CUDA engine; Fermion ships CUDA only as this image.
+services:
+  phonon:
+    image: ghcr.io/fermionresearch/phonon-cuda:1.0.6
+    command: serve phonon-2 --host 0.0.0.0 --port 8000
+    ports:
+      - "127.0.0.1:8010:8000"
+    volumes:
+      - phonon-cache:/home/phonon/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  phonon-cache:
