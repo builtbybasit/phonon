@@ -28,9 +28,17 @@ First start compiles shaders (~20 s on Mac). Useful flags: `--host 0.0.0.0`, `--
 
 The pip package has no CUDA engine (installing CUDA torch does nothing — the CPU engine never uses it). Fermion ships CUDA only as a Docker image, which serves the same API on the same port:
 
+Create a `.env` file with an API key before starting the container:
+
+```dotenv
+API_KEY=<strong-random-key>
+```
+
 ```bash
 docker compose up -d
 ```
+
+Compose passes `API_KEY` to the container as `PHONON_API_KEY`. The container binds to `0.0.0.0`, while Docker publishes it only on `127.0.0.1`.
 
 - **Windows:** [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) with the WSL2 backend and a current NVIDIA driver. No CUDA toolkit needed.
 - **Linux:** Docker + [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
@@ -41,6 +49,7 @@ Check the GPU is visible: `docker run --rm --gpus all ubuntu nvidia-smi`. Logs: 
 
 ```bash
 curl http://127.0.0.1:8010/v1/audio/transcriptions \
+  -H "Authorization: Bearer <same-key-as-.env>" \
   -F file=@demo/example3.wav -F model=phonon-2
 ```
 
@@ -55,7 +64,7 @@ OpenAI SDK:
 ```python
 from openai import OpenAI
 
-client = OpenAI(base_url="http://127.0.0.1:8010/v1", api_key="x")
+client = OpenAI(base_url="http://127.0.0.1:8010/v1", api_key="<same-key-as-.env>")
 with open("demo/example3.wav", "rb") as f:
     print(client.audio.transcriptions.create(model="phonon-2", file=f).text)
 ```
