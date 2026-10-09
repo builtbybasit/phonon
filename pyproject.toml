@@ -1,19 +1,15 @@
 [project]
 name = "phonon"
 version = "0.1.0"
+description = "Local OpenAI-compatible speech-to-text server for Phonon-2"
 requires-python = ">=3.12"
 dependencies = [
-    "fermion-research>=0.2.9",
-    "scipy>=1.17.1",
-    "soundfile>=0.14.0",
-    "zstandard>=0.25.0",
-    # Apple Silicon: GPU via MLX
-    "mlx>=0.32.3; sys_platform == 'darwin'",
-    "mlx-audio>=0.4.2; sys_platform == 'darwin'",
-    "mlx-lm>=0.31.1; sys_platform == 'darwin'",
-    # Windows / Linux: CPU via torch
+    # [mlx] only resolves on Apple Silicon; everywhere else runs the CPU engine
+    "fermion-research[mlx]>=0.2.11",
+    # mlx-audio < 0.5 crashes Phonon-2 --hotwords ('ParakeetTDT' has no 'blank_id')
+    "mlx-audio>=0.5.8; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    # Direct dep so the CPU index below applies (Windows / Linux)
     "torch; sys_platform != 'darwin'",
-    "safetensors; sys_platform != 'darwin'",
 ]
 
 [[tool.uv.index]]
@@ -22,4 +18,4 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cpu" }
+torch = { index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }
