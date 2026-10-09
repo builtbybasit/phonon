@@ -2,7 +2,7 @@
 # The pip package has no CUDA engine; Fermion ships CUDA only as this image.
 services:
   phonon:
-    image: ghcr.io/fermionresearch/phonon-cuda:1.0.6
+    image: ghcr.io/fermionresearch/phonon-cuda:1.0.8
     command: serve phonon-2 --host 0.0.0.0 --port 8000
     environment:
       PHONON_API_KEY: ${API_KEY:?Set API_KEY in .env}

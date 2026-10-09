@@ -1,9 +1,9 @@
 # phonon
 
-Local OpenAI-compatible speech-to-text server for [Phonon-2](https://www.fermionresearch.com/research/phonon-2/) (English ASR, 164 MB, CC-BY-4.0), via the `fermion-research` package.
+Local OpenAI-compatible speech-to-text server for [Phonon-2](https://www.fermionresearch.com/research/phonon-2/) (English ASR, 164 MB, CC-BY-4.0), via the `fermion-research` package. Upstream docs: [fermionresearch/phonon](https://github.com/fermionresearch/phonon).
 
 - **macOS (Apple Silicon):** GPU via MLX
-- **Windows / Linux (x64):** CPU via torch
+- **Windows / Linux / Intel Mac:** CPU (x86-64 with SSE4.1+, or 64-bit Arm). `uv run phonon describe` shows the CPU tier used.
 - **NVIDIA GPU (Windows / Linux):** CUDA via Docker — see [NVIDIA GPU](#nvidia-gpu)
 
 ## Setup
@@ -14,7 +14,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 uv sync
 ```
 
-The right backend is picked per platform. The model downloads on first run to `~/.cache/fermion/`.
+The right backend is picked per platform (`fermion-research[mlx]` only adds MLX on Apple Silicon). The model downloads on first run to `~/.cache/fermion/`.
 
 ## Run
 
@@ -22,7 +22,7 @@ The right backend is picked per platform. The model downloads on first run to `~
 uv run phonon serve --port 8010
 ```
 
-First start compiles shaders (~20 s on Mac). Useful flags: `--host 0.0.0.0`, `--api-key KEY`, `--cors`, `--threads N` (CPU). See `uv run phonon serve -h`.
+First start compiles shaders (~20 s on Mac). Useful flags: `--host 0.0.0.0`, `--api-key KEY`, `--cors`, `--threads N` (CPU), `--unix-socket PATH` (owner-only socket instead of an API key). See `uv run phonon serve -h`.
 
 ## NVIDIA GPU
 
@@ -59,6 +59,8 @@ curl http://127.0.0.1:8010/v1/audio/transcriptions \
 
 Word timestamps: add `-F response_format=verbose_json -F 'timestamp_granularities[]=word'`.
 
+Hotwords (up to 25 names/terms to favour): add `-F hotwords="Ada, Quillon"`. See [hotwords](https://github.com/fermionresearch/phonon/blob/main/docs/hotwords.md).
+
 OpenAI SDK:
 
 ```python
@@ -69,12 +71,17 @@ with open("demo/example3.wav", "rb") as f:
     print(client.audio.transcriptions.create(model="phonon-2", file=f).text)
 ```
 
-Endpoints: `POST /v1/audio/transcriptions`, `GET /v1/models`. No chat endpoints (speech model).
+Endpoints: `POST /v1/audio/transcriptions`, `GET /v1/models`, WebSocket `/v1/audio/stream` for live audio ([protocol](https://github.com/fermionresearch/phonon/blob/main/docs/server.md#get-v1audiostream-websocket)). No chat endpoints (speech model).
 
 ## CLI
 
 ```bash
 uv run phonon transcribe demo/example2.wav          # one file
 uv run phonon transcribe demo/example2.wav --json   # with word timestamps
-uv run phonon listen                                # live microphone
+uv run phonon transcribe demo/example2.wav --hotwords "Ada, Quillon"   # favour names/terms
+uv run phonon listen                                # live microphone (Apple Silicon)
 ```
+
+Other models (`phonon-1`, `phonon-1-micro`, `phonon-1-big`): `uv run fermion transcribe phonon-1 file.wav`. `uv run fermion models` lists them.
+
+More: [CLI](https://github.com/fermionresearch/phonon/blob/main/docs/cli.md), [server](https://github.com/fermionresearch/phonon/blob/main/docs/server.md), [troubleshooting](https://github.com/fermionresearch/phonon/blob/main/docs/troubleshooting.md).
