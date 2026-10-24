@@ -1,12 +1,13 @@
 [project]
 name = "phonon"
 version = "0.1.0"
-description = "Local OpenAI-compatible speech-to-text server for Phonon-2"
+description = "Local OpenAI-compatible speech-to-text server for Phonon-2.5 English"
 requires-python = ">=3.12"
 dependencies = [
     # [mlx] only resolves on Apple Silicon; everywhere else runs the CPU engine
-    "fermion-research[mlx]>=0.2.11",
-    # mlx-audio < 0.5 crashes Phonon-2 --hotwords ('ParakeetTDT' has no 'blank_id')
+    "fermion-research[mlx]>=0.2.14",
+    # mlx-audio < 0.5 crashes --hotwords ('ParakeetTDT' has no 'blank_id'); [mlx] sets no floor,
+    # and without this uv picks 0.4.2 to share transformers 5.0 with Intel Mac
     "mlx-audio>=0.5.8; sys_platform == 'darwin' and platform_machine == 'arm64'",
     # Direct dep so the CPU index below applies (Windows / Linux)
     "torch; sys_platform != 'darwin'",
